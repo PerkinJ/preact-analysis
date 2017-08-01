@@ -31,31 +31,36 @@ export function h(nodeName, attributes) {
    *   }, 'content: bar')
    * })
    */ 
-  if (attributes && attributes.children!=null) {
+    if (attributes && attributes.children!=null) {
       if (!stack.length) stack.push(attributes.children);
       delete attributes.children;
     }
+  ／**
+    *以下部分主要对stack进行处理，对所有子节点进行遍历
+    *／
     while (stack.length) {
       if ((child = stack.pop()) && child.pop!==undefined) {
+         //这里考虑的是如果child为数组的情况，则以此推入stack.注意：每次循环都会进行child = stack.pop()操作
         for (i=child.length; i--; ) stack.push(child[i]);
       }
       else {
         if (typeof child==='boolean') child = null;
-
+        // 这里判断nodeName是否为function,并赋值给simple,若不为function,则认为simple为true，我们不妨设为简单匹配跟非简单匹配。
         if ((simple = typeof nodeName!=='function')) {
           if (child==null) child = '';
           else if (typeof child==='number') child = String(child);
-          else if (typeof child!=='string') simple = false;
+          else if (typeof child!=='string') simple = false;  //如果child非字符串,simple则为false，即为非简单匹配
         }
 
         if (simple && lastSimple) {
+          //如果本次跟上一次循环都是非简单匹配，则将字符串拼接
           children[children.length-1] += child;
         }
         else if (children===EMPTY_CHILDREN) {
-          children = [child];
+          children = [child];   //首次赋值
         }
         else {
-          children.push(child);
+          children.push(child);  //其他情况则将结果push到chidren内
         }
 
         lastSimple = simple;
